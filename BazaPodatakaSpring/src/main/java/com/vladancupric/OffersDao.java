@@ -12,7 +12,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component("offersDao")
 public class OffersDao {
@@ -83,7 +86,18 @@ public class OffersDao {
 		
 		return jdbc.update("INSERT INTO offers (id, name, text, email) VALUES (:id, :name, :text, :email)", params) == 1;
 	}
-	
+	//update offer in db
+		public boolean update (Offer offer){
+			BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(offer);
+			
+			return jdbc.update("UPDATE offers SET name = :name, text = :text, email = :email WHERE id = :id", params) == 1;
+		}
+		//batch update - update several rows in db at once
+		@Transactional
+		public int[] create (List<Offer> offers){
+			SqlParameterSource[] params = SqlParameterSourceUtils.createBatch(offers.toArray());
+			return jdbc.batchUpdate("InSERT INTO offers (id, name, text, email) VALUES (:id, :name, :text, :email)", params); 
+		}
 
 }	
 		
